@@ -1,0 +1,29 @@
+{
+  "description": "UI/UX quality validation hooks — warns on known anti-patterns when editing dashboard files",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/validate_changes.js",
+            "timeout": 10
+          }
+        ],
+        "description": "Validate Edit operations against known UI/UX anti-patterns"
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/validate_changes.js",
+            "timeout": 10
+          }
+        ],
+        "description": "Validate Write operations against known UI/UX anti-patterns"
+      }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "code-quality-guardian",
+  "description": "Universal UI/UX and code quality guardian. Captures learned patterns from defect fixes, validates code against 30+ anti-patterns via real-time hooks, audits pages/components, reviews implementation plans, and learns continuously from every fix. Works with any React/Next.js/Tailwind project. Integrates with ralph-loop for iterative quality improvement.",
+  "version": "2.0.0",
+  "author": {
+    "name": "Konrad Adam"
+  }
+}
