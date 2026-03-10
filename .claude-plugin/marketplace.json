@@ -1,0 +1,26 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "code-quality-guardian",
+  "description": "Universal UI/UX and code quality guardian for Claude Code",
+  "owner": {
+    "name": "Konrad Adam"
+  },
+  "plugins": [
+    {
+      "name": "code-quality-guardian",
+      "source": "./",
+      "description": "Universal UI/UX and code quality guardian. Audits pages against 30+ anti-patterns, reviews implementation plans, learns from fixes, and validates code via real-time hooks. Works with any React/Next.js/Tailwind project.",
+      "version": "2.0.0",
+      "author": {
+        "name": "Konrad Adam"
+      },
+      "keywords": [
+        "quality",
+        "ui-ux",
+        "audit",
+        "code-review",
+        "patterns"
+      ]
+    }
+  ]
+}
