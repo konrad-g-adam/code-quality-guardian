@@ -115,6 +115,44 @@ For sending features:
 
 ---
 
+
+## 11. Security API Checklist
+
+For every API endpoint receiving external data or performing mutations:
+
+- [ ] **Webhook signature verified** — Raw body preserved, signature checked against provider secret before parsing
+- [ ] **Mutation routes authenticated** — `getAuthUser(req)` as first operation in all POST/PUT/DELETE handlers
+- [ ] **Public tokens HMAC-signed** — Unsubscribe, confirm, and action links use `createHmac('sha256', CRON_SECRET)`
+- [ ] **Public endpoints have CORS headers** — `Access-Control-Allow-Origin: *` + OPTIONS handler for embeddable endpoints
+- [ ] **Rate limit threshold correct** — `count >= 5` (not `count > 0`) for soft limits that allow retries
+
+## 12. Tier Gating Checklist
+
+For every sprint with premium features:
+
+- [ ] **Premium POST endpoints gated** — `getUserUsageData()` + tier check before processing body; 402 for free tier
+- [ ] **Stripe price IDs per tier** — Separate `STRIPE_PRO_MONTHLY_PRICE_ID` and creator price IDs in env
+- [ ] **Tier mapping complete** — `getTierFromPlan()` maps all plan names including "professional"
+- [ ] **UpgradeModal wired** — Client components handle 402 response by showing UpgradeModal
+
+## 13. React Patterns Checklist
+
+For every component with data fetching or async behavior:
+
+- [ ] **useEffect async pattern** — `useEffect(() => { async function load() {...} load(); }, [])` — NOT `useEffect(async () => {...})`
+- [ ] **Auto-save stale closure** — Debounced save callbacks wrapped in `useCallback([...deps])` to prevent stale values
+- [ ] **Client page metadata** — "use client" pages cannot export `metadata`; add co-located `layout.tsx` for SEO
+- [ ] **Array state typed** — `useState<MyItem[]>` not `useState<unknown[]>` — define interface for all array items
+- [ ] **Async cleanup** — `useEffect` returns cleanup function that cancels pending async operations on unmount
+
+## Additional Red Flags (Sprint 9.5 additions)
+
+- "Add webhook handler" without mention of signature verification
+- "New premium feature" without tier gating on the API endpoint
+- "Schedule sends with filters" without confirming filters are persisted to DB
+- "Batch send emails" without per-subscriber event tracking
+- New page in `(marketing)` group that needs SEO metadata — check if it's a client component
+
 ## Sprint Task File Quality Criteria
 
 A well-written sprint task file should:
