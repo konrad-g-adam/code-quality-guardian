@@ -13,7 +13,7 @@ After installing, you have 4 layers of quality protection:
 | Layer | Tool | How It Works |
 |-------|------|--------------|
 | **Automatic** | PreToolUse Hooks | Warns when you Edit/Write code containing known anti-patterns |
-| **On-Demand Audit** | `/audit-page <path>` | Full 30+ pattern check on any page or component |
+| **On-Demand Audit** | `/audit-page <path>` | Full 45+ pattern check on any page or component |
 | **Plan Review** | `/review-plan <path>` | Validates plans/PRDs/sprints before you start building |
 | **Learning** | `/learn-fix` | Captures new patterns from fixes you just made |
 
@@ -30,7 +30,7 @@ Run a comprehensive UI/UX quality audit on a page or component.
 /audit-page components/DataTable.tsx        # Component file
 ```
 
-**What it checks:** 30+ patterns across 7 categories — Layout, Visibility, iframe, Dialog, TypeScript, Reusability, Responsive.
+**What it checks:** 45+ patterns across 10 categories — Layout, Visibility, iframe, Dialog, TypeScript, Reusability, Responsive, Security, Email/Sending, API Completeness.
 
 ### `/review-plan <path>`
 Validate an implementation plan before you start building.
@@ -96,7 +96,7 @@ If a match is found, you'll see a **warning** (not a block) with the pattern ID 
 ## Skills (Knowledge Base)
 
 ### ui-quality-patterns
-30+ defect patterns with before/after code examples. Auto-loaded as context when relevant.
+45+ defect patterns with before/after code examples. Auto-loaded as context when relevant.
 
 **References:**
 - `references/layout-patterns.md` — Layout architecture patterns (LAYOUT-001 to 003)
