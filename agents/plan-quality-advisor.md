@@ -132,6 +132,31 @@ Every feature MUST consider:
 - [ ] Debouncing for user input handlers
 - [ ] Image optimization (next/image or equivalent)
 
+
+### 11. Security API Checklist
+Every API endpoint that receives external calls MUST verify:
+- [ ] **Webhook endpoints** — Signature verification before parsing body (svix, HMAC, or provider SDK)
+- [ ] **Mutation routes (POST/PUT/DELETE)** — `getAuthUser(req)` called before any DB operation
+- [ ] **Public action tokens** — HMAC-signed (unsubscribe links, double opt-in confirm, one-click actions)
+- [ ] **Public endpoints** — CORS headers (`Access-Control-Allow-Origin`) + OPTIONS handler
+- [ ] **Rate limiting considered** — For unauthenticated endpoints that could be abused
+
+### 12. Tier Gating Checklist
+Every premium feature endpoint MUST verify:
+- [ ] **Premium POST endpoints** — `getUserUsageData()` called and tier checked before processing body
+- [ ] **Free tier guard** — Returns 402 with `{ error: 'upgrade_required', limitName }` for free users
+- [ ] **Checkout differentiation** — Each pricing tier mapped to correct Stripe price ID
+- [ ] **Tier mapping function** — All plan names (creator, professional) mapped in `getTierFromPlan()`
+- [ ] **UI upgrade prompt** — 402 response triggers `UpgradeModal` in client components
+
+### 13. React Patterns Checklist
+Every component with data fetching MUST verify:
+- [ ] **useEffect async pattern** — Named function declared inside useEffect, not inline `async` callback
+- [ ] **Stale closure prevention** — Debounced auto-save functions wrapped in `useCallback` with proper deps
+- [ ] **Metadata in client pages** — If page is "use client", metadata MUST be in separate co-located `layout.tsx`
+- [ ] **useState array typing** — `useState<MyItem[]>` not `useState<unknown[]>` for typed array state
+- [ ] **Cleanup on unmount** — Timers, subscriptions, and pending fetches cancelled in useEffect cleanup
+
 ## Review Process
 
 1. **Read the planning document** completely (supports any format: sprint file, PRD, task list, user stories, etc.)
