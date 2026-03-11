@@ -42,6 +42,24 @@ const RULES = [
     contentPattern: /DialogContent[^>]*className[^>]*overflow-y-auto(?![^>]*showCloseButton)/,
     message: "DIALOG-002: Scrollable DialogContent without showCloseButton={false} — close button may scroll away. Add sticky header with explicit X."
   },
+  {
+    id: "TS-004",
+    filePattern: /\.(tsx|jsx|ts)$/i,
+    contentPattern: /useState<unknown\[\]>/,
+    message: "TS-004: useState<unknown[]> causes downstream TypeScript errors when array items are passed as component props. Define a named interface: useState<MyItem[]>()."
+  },
+  {
+    id: "ASYNC-001",
+    filePattern: /\.(tsx|jsx|ts)$/i,
+    contentPattern: /useEffect\(\s*async\s*\(/,
+    message: "ASYNC-001: Inline async callback in useEffect causes unhandled promise rejections on unmount. Use: useEffect(() => { async function load() { ... } load(); }, []) instead."
+  },
+  {
+    id: "FE-003",
+    filePattern: /page\.(tsx|jsx)$/i,
+    contentPattern: /['"]use client['"][\s\S]*export\s+(const\s+metadata|function\s+generateMetadata)|export\s+(const\s+metadata|function\s+generateMetadata)[\s\S]*['"]use client['"]/,
+    message: "FE-003: 'use client' and metadata export in the same Next.js page file - Next.js silently ignores metadata in client components. Move metadata to a co-located layout.tsx."
+  },
 ];
 
 function checkRules(filePath, content) {
