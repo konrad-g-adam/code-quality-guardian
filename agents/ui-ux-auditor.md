@@ -4,7 +4,7 @@ description: >
   Use this agent PROACTIVELY after writing or modifying any page, component, or layout code
   in a React/Next.js/Tailwind project. Also use when the user asks to review, audit, or check
   UI/UX quality of a page or component. Works with ANY project — not tied to a specific codebase.
-  This agent validates code against a comprehensive catalog of 30+ known UI/UX defect anti-patterns
+  This agent validates code against a comprehensive catalog of 45+ known UI/UX defect anti-patterns
   learned from real production fixes. It catches layout gaps, visibility issues, TypeScript typing errors,
   iframe measurement bugs, dialog focus traps, and responsive design problems BEFORE they reach the user.
 
@@ -14,7 +14,7 @@ description: >
   assistant: "I'll run the UI/UX auditor to validate the page against known defect patterns."
   <commentary>
   Invoke ui-ux-auditor when any page or component has been created or modified.
-  The agent checks against 30+ learned anti-patterns from real production fixes.
+  The agent checks against 45+ learned anti-patterns from real production fixes.
   </commentary>
   </example>
 
@@ -63,7 +63,7 @@ This agent is part of the **Code Quality Guardian** plugin. Here's how it fits w
 
 | Tool | When to Use |
 |------|-------------|
-| **This agent (ui-ux-auditor)** | After building/modifying UI — validates against 30+ patterns |
+| **This agent (ui-ux-auditor)** | After building/modifying UI — validates against 45+ patterns |
 | `/audit-page <path>` | Quick command to invoke this agent on a specific file |
 | `/learn-fix` | After fixing a NEW defect — captures the pattern for future audits |
 | `/review-plan <path>` | Before implementation — validates a plan/task file against patterns |
@@ -187,6 +187,80 @@ This agent is part of the **Code Quality Guardian** plugin. Here's how it fits w
 - Symptom: Content overflows on mobile screens
 - Fix: Use `max-w-[700px] w-full` or add responsive breakpoints
 
+
+### Category 8: Security & Auth Patterns
+
+**SEC-001: Webhook Endpoint Without Signature Verification**
+- Anti-pattern: `/api/webhooks/*` route that processes the request body without verifying the sender's signature
+- Symptom: Any HTTP client can forge webhook events (e.g., fake payment confirmations, fake email events)
+- Root cause: Forgetting that webhooks are unauthenticated — the payload must be authenticated via HMAC or provider SDK
+- Fix: Use provider SDK (e.g., `svix.Webhooks.verify()` for Stripe, `crypto.createHmac()` for custom) against raw body before parsing
+- Check: Grep for `app/api/webhooks` or `stripe-webhook` — verify `rawBody` or `svix` is present
+
+**SEC-002: API Mutation Route Without Auth Guard**
+- Anti-pattern: POST/PUT/DELETE route that mutates data without calling `getAuthUser(req)` at the top
+- Symptom: Unauthenticated callers can modify or delete other users' data
+- Fix: Always call `const user = await getAuthUser(req); if (!user) return NextResponse.json({error:'Unauthorized'}, {status:401});` as first operation
+- Check: Grep all `route.ts` files for `export async function (POST|PUT|DELETE|PATCH)` — verify `getAuthUser` precedes any DB operation
+
+**SEC-003: Public Tokens Without Cryptographic Signing**
+- Anti-pattern: Unsubscribe links, confirmation tokens, or one-click action links using plain UUIDs or encoded IDs
+- Symptom: Tokens are guessable or enumerable — attacker can unsubscribe arbitrary users
+- Fix: Sign with HMAC: `crypto.createHmac('sha256', process.env.CRON_SECRET).update(userId).digest('hex')`; verify on receipt
+- Check: Grep for `unsubscribe` routes — verify HMAC verification before DB update
+
+**SEC-004: Public API Endpoint Missing CORS Headers**
+- Anti-pattern: Public endpoints (subscribe, unsubscribe, archive view) without `Access-Control-Allow-Origin` header and OPTIONS handler
+- Symptom: Cross-origin fetch from embedded forms or third-party pages fails silently in browser
+- Fix: Add `'Access-Control-Allow-Origin': '*'` to response headers + handle `OPTIONS` method returning 200 with CORS headers
+- Check: Grep for `/api/public/` routes — verify OPTIONS handler and CORS headers on all responses
+
+### Category 9: Email & Sending Completeness Patterns
+
+**EMAIL-001: Missing Per-Subscriber "Sent" Event Records**
+- Anti-pattern: Email batch send that only updates the `email_sends` aggregate counter without inserting individual `subscriber_events` rows
+- Symptom: Send detail subscriber tab shows no events; CSV export is empty; deliverability debugging impossible
+- Fix: After each batch, insert `{ subscriber_id, send_id, event_type: 'sent', created_at }` rows into `subscriber_events` for all successful sends
+- Check: Grep `send-newsletter.ts` — verify `subscriber_events` insert after each batch
+
+**EMAIL-002: Scheduled Send Filters Not Persisted**
+- Anti-pattern: Send scheduled with list_id/tag_filter selected in UI, but those values not saved to `email_sends` record
+- Symptom: Scheduled send ignores the list/tag filter and sends to all subscribers at execution time
+- Fix: Save `list_id` and `tag_filter` columns when scheduling; cron reads them before calling `sendNewsletterToSubscribers()`
+- Check: Verify `email_sends` table has `list_id` and `tag_filter` columns; grep cron route to confirm they're applied
+
+**EMAIL-003: Unsubscribe Counter Not Incremented**
+- Anti-pattern: Unsubscribe webhook/endpoint updates subscriber status but doesn't call `increment_send_counter` with `unsubscribed: 1`
+- Symptom: Send analytics show 0 unsubscribes even when users have unsubscribed
+- Fix: In the unsubscribe handler, call `increment_send_counter(send_id, 'unsubscribed')` if `send_id` is traceable from subscriber events
+- Check: Grep unsubscribe route — verify counter increment alongside status update
+
+**EMAIL-004: Email URLs With Platform-Specific Path Separators**
+- Anti-pattern: Email body URLs constructed with backslashes (`\dashboard\content`) instead of forward slashes
+- Symptom: Email links are broken on non-Windows mail clients; URLs appear as `\dashboard\content` in email source
+- Fix: Always use forward slashes in URL strings: `${baseUrl}/dashboard/content/${id}`; never use `path.join()` for URLs
+- Check: Grep email template generation code for backslash in URL strings
+
+### Category 10: API Completeness Patterns
+
+**API-001: Missing Tier Gating on Premium Feature Endpoints**
+- Anti-pattern: POST endpoint for a premium feature (Brand Voice, A/B Testing, Autopilot, Signup Forms, Repurposing) without checking subscription tier
+- Symptom: Free users can access paid features; revenue leakage; misaligned product limits
+- Fix: Call `getUserUsageData()` at the start of the POST handler; if `usageData.tier === 'free'`, return `NextResponse.json({ error: 'upgrade_required', limitName: 'Feature Name' }, { status: 402 })`
+- Check: Grep all feature POST routes — verify `getUserUsageData` and tier check before body processing
+
+**API-002: Webhook Event Deduplication Missing**
+- Anti-pattern: Webhook handler that inserts `subscriber_events` without checking for existing identical event
+- Symptom: Duplicate open/click/bounce events when webhook fires multiple times (common with Resend retries)
+- Fix: Check `subscriber_events` for existing `(send_id, subscriber_id, event_type)` before inserting; or use database unique constraint
+- Check: Grep webhook route — verify `maybeSingle()` existence check or upsert before `subscriber_events` insert
+
+**API-003: Client-Side Data Mapping Not Applied Server-Side**
+- Anti-pattern: UI has column mapping dropdowns (e.g., CSV import column mapping) but the selection is never sent to or used by the API
+- Symptom: Server ignores user's column mapping and falls back to auto-detect, causing wrong data import
+- Fix: Send mapping as JSON in FormData (`formData.append('mapping', JSON.stringify(mapping))`); server reads and prioritizes it over auto-detect
+- Check: Grep import route and modal component — verify FormData includes mapping and server parses it
+
 ## Audit Process
 
 For each file/page you audit:
@@ -224,7 +298,7 @@ For each file/page you audit:
 
 ## Important Rules
 
-- NEVER skip a pattern category — check ALL 7 categories for every audit
+- NEVER skip a pattern category — check ALL 10 categories for every audit
 - ALWAYS provide exact line numbers and file paths
 - ALWAYS show the fix, not just the problem
 - If you find a NEW pattern not in the catalog, flag it as "NEW PATTERN DETECTED — capture via /learn-fix"
