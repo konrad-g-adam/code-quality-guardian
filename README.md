@@ -13,7 +13,7 @@ After installing, you have 4 layers of quality protection:
 | Layer | Tool | How It Works |
 |-------|------|--------------|
 | **Automatic** | PreToolUse Hooks | Warns when you Edit/Write code containing known anti-patterns |
-| **On-Demand Audit** | `/audit-page <path>` | Full 45+ pattern check on any page or component |
+| **On-Demand Audit** | `/audit-page <path>` | Full 50+ pattern check on any page or component |
 | **Plan Review** | `/review-plan <path>` | Validates plans/PRDs/sprints before you start building |
 | **Learning** | `/learn-fix` | Captures new patterns from fixes you just made |
 
@@ -30,7 +30,7 @@ Run a comprehensive UI/UX quality audit on a page or component.
 /audit-page components/DataTable.tsx        # Component file
 ```
 
-**What it checks:** 45+ patterns across 10 categories — Layout, Visibility, iframe, Dialog, TypeScript, Reusability, Responsive, Security, Email/Sending, API Completeness.
+**What it checks:** 50+ patterns across 11 categories — Layout, Visibility, iframe, Dialog, TypeScript, Reusability, Responsive, Security, Email/Sending, Text/State Persistence, API Completeness.
 
 ### `/review-plan <path>`
 Validate an implementation plan before you start building.
@@ -88,6 +88,11 @@ The plugin registers **PreToolUse hooks** on `Edit` and `Write` operations. When
 | TS-001 | `Record<string, unknown>` in useState | TypeScript build failures |
 | IFRAME-001 | `scrollHeight` for iframe measurement | Wrong content height |
 | DIALOG-002 | Scrollable DialogContent without sticky close | Close button scrolls away |
+| ASYNC-001 | Inline `async` callback in useEffect | Unhandled promise rejections |
+| FE-003 | `"use client"` + metadata export in same page | Metadata silently ignored |
+| TS-004 | `useState<unknown[]>` | Downstream type errors on props |
+| TRUNC-001 | `.substring(0,N) + "..."` in JSX | Hard-cut text, broken on mobile |
+| DEBOUNCE-001 | `setTimeout(async` without useRef cleanup | Memory leak on unmount |
 
 If a match is found, you'll see a **warning** (not a block) with the pattern ID and fix recommendation.
 
@@ -96,7 +101,7 @@ If a match is found, you'll see a **warning** (not a block) with the pattern ID 
 ## Skills (Knowledge Base)
 
 ### ui-quality-patterns
-45+ defect patterns with before/after code examples. Auto-loaded as context when relevant.
+50+ defect patterns with before/after code examples. Auto-loaded as context when relevant.
 
 **References:**
 - `references/layout-patterns.md` — Layout architecture patterns (LAYOUT-001 to 003)
@@ -108,7 +113,7 @@ Planning-phase checklists and rules. Auto-loaded when reviewing plans.
 
 **References:**
 - `references/api-typing-rules.md` — 5 rules for TypeScript API response typing
-- `references/planning-checklist.md` — 10-section pre-build checklist
+- `references/planning-checklist.md` — 14-section pre-build checklist
 
 ---
 
@@ -213,7 +218,7 @@ code-quality-guardian/
 │       ├── SKILL.md             # Planning checklist overview
 │       └── references/
 │           ├── api-typing-rules.md   # TypeScript API typing rules
-│           └── planning-checklist.md # 10-section pre-build checklist
+│           └── planning-checklist.md # 14-section pre-build checklist
 └── README.md                    # This file
 ```
 
