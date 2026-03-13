@@ -4,8 +4,9 @@ description: >
   Comprehensive UI/UX quality pattern library learned from real production defect fixes in
   React/Next.js + Tailwind CSS + Radix UI applications. Auto-triggers when building or
   modifying pages, components, layouts, iframes, dialogs, tables, or forms in ANY project.
-  Contains 30+ anti-patterns with proven fixes across 7 categories: Layout, Visibility,
-  iframe/Preview, Dialog/Modal, TypeScript/API, Component Reusability, and Responsive design.
+  Contains 50+ anti-patterns with proven fixes across 11 categories: Layout, Visibility,
+  iframe/Preview, Dialog/Modal, TypeScript/API, Component Reusability, Responsive design,
+  Security/Auth, Email/Sending, Text/State Persistence, and API Completeness.
   Use this knowledge to prevent defects before they happen.
 version: 2.0.0
 ---
@@ -47,6 +48,10 @@ This skill provides a comprehensive catalog of UI/UX defect patterns learned fro
 | TypeScript & API | TS-001 to TS-003 | [common-defects.md](references/common-defects.md) |
 | Component Reusability | REUSE-001 to REUSE-002 | [common-defects.md](references/common-defects.md) |
 | Responsive & Mobile | RESP-001 to RESP-002 | [common-defects.md](references/common-defects.md) |
+| Security & Auth | SEC-001 to SEC-004 | [common-defects.md](references/common-defects.md) |
+| Email & Sending | EMAIL-001 to EMAIL-004 | [common-defects.md](references/common-defects.md) |
+| Text & State | TRUNC-001, STATE-001, DEBOUNCE-001 | [common-defects.md](references/common-defects.md) |
+| API Completeness | API-001 to API-003 | [common-defects.md](references/common-defects.md) |
 
 ## Fix Implementation Guide
 

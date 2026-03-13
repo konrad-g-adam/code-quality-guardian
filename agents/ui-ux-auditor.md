@@ -4,7 +4,7 @@ description: >
   Use this agent PROACTIVELY after writing or modifying any page, component, or layout code
   in a React/Next.js/Tailwind project. Also use when the user asks to review, audit, or check
   UI/UX quality of a page or component. Works with ANY project — not tied to a specific codebase.
-  This agent validates code against a comprehensive catalog of 45+ known UI/UX defect anti-patterns
+  This agent validates code against a comprehensive catalog of 50+ known UI/UX defect anti-patterns
   learned from real production fixes. It catches layout gaps, visibility issues, TypeScript typing errors,
   iframe measurement bugs, dialog focus traps, and responsive design problems BEFORE they reach the user.
 
@@ -241,7 +241,28 @@ This agent is part of the **Code Quality Guardian** plugin. Here's how it fits w
 - Fix: Always use forward slashes in URL strings: `${baseUrl}/dashboard/content/${id}`; never use `path.join()` for URLs
 - Check: Grep email template generation code for backslash in URL strings
 
-### Category 10: API Completeness Patterns
+### Category 10: Text Truncation & State Persistence Patterns
+
+**TRUNC-001: JS Truncation Instead of CSS**
+- Anti-pattern: Using `.substring(0, N) + "..."` or `.slice(0, N) + "..."` to truncate text in JSX
+- Symptom: Text is hard-cut at a fixed character count regardless of container width; looks broken on wide screens and overly truncated on mobile
+- Root cause: Character-based truncation doesn't adapt to responsive layouts or font rendering
+- Fix: Replace with CSS `truncate max-w-[Npx] inline-block align-bottom` inside a flex/inline container. The `truncate` class applies `overflow:hidden; text-overflow:ellipsis; white-space:nowrap`
+- Check: Grep for `.substring(0,` or `.slice(0,` followed by `+ "..."` in TSX/JSX files
+
+**STATE-001: sessionStorage Parse Without Validation**
+- Anti-pattern: `JSON.parse(sessionStorage.getItem("key"))` without try/catch or schema validation
+- Symptom: Runtime crash if stored data is malformed, corrupted, or from a different app version
+- Fix: Wrap in try/catch with fallback: `try { const data = JSON.parse(raw); if (!data?.requiredField) throw new Error(); } catch { /* fallback */ }`
+- Check: Grep for `JSON.parse(sessionStorage` without surrounding try/catch
+
+**DEBOUNCE-001: setTimeout in Event Handler Without Cleanup**
+- Anti-pattern: `setTimeout(async () => { ... }, delay)` in a React callback without clearing via `useRef` and `useEffect` cleanup
+- Symptom: Timer fires after component unmounts, causing "Can't perform state update on unmounted component" or stale closure accessing old state
+- Fix: Store timer ID in `useRef`, clear in `useEffect` cleanup: `useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, [])`
+- Check: Grep for `setTimeout` in component files — verify corresponding `useRef` + cleanup `useEffect`
+
+### Category 11: API Completeness Patterns
 
 **API-001: Missing Tier Gating on Premium Feature Endpoints**
 - Anti-pattern: POST endpoint for a premium feature (Brand Voice, A/B Testing, Autopilot, Signup Forms, Repurposing) without checking subscription tier
@@ -267,7 +288,7 @@ For each file/page you audit:
 
 1. **Detect the project structure** — look for layout files, component directories, and config (next.config, tailwind.config, tsconfig)
 2. **Read the target file** completely
-3. **Check each pattern** in the catalog above (ALL 7 categories)
+3. **Check each pattern** in the catalog above (ALL 11 categories)
 4. **Search for anti-patterns** using Grep across related files (imports, layout, shared components)
 5. **Report findings** in this format:
 
@@ -298,7 +319,7 @@ For each file/page you audit:
 
 ## Important Rules
 
-- NEVER skip a pattern category — check ALL 10 categories for every audit
+- NEVER skip a pattern category — check ALL 11 categories for every audit
 - ALWAYS provide exact line numbers and file paths
 - ALWAYS show the fix, not just the problem
 - If you find a NEW pattern not in the catalog, flag it as "NEW PATTERN DETECTED — capture via /learn-fix"

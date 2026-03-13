@@ -60,6 +60,18 @@ const RULES = [
     contentPattern: /['"]use client['"][\s\S]*export\s+(const\s+metadata|function\s+generateMetadata)|export\s+(const\s+metadata|function\s+generateMetadata)[\s\S]*['"]use client['"]/,
     message: "FE-003: 'use client' and metadata export in the same Next.js page file - Next.js silently ignores metadata in client components. Move metadata to a co-located layout.tsx."
   },
+  {
+    id: "TRUNC-001",
+    filePattern: /\.(tsx|jsx)$/i,
+    contentPattern: /\.substring\(\s*0\s*,\s*\d+\s*\)\s*\+?\s*["'`]\.{2,3}["'`]?|\.slice\(\s*0\s*,\s*\d+\s*\)\s*\+?\s*["'`]\.{2,3}["'`]?/,
+    message: "TRUNC-001: JS .substring()/.slice() + '...' truncation in JSX — use CSS 'truncate max-w-[Npx] inline-block align-bottom' instead for graceful responsive overflow."
+  },
+  {
+    id: "DEBOUNCE-001",
+    filePattern: /\.(tsx|jsx)$/i,
+    contentPattern: /setTimeout\s*\(\s*async\s/,
+    message: "DEBOUNCE-001: async function inside setTimeout without useRef cleanup — use useRef for timer ID and clear in useEffect cleanup to prevent stale closures and memory leaks on unmount."
+  },
 ];
 
 function checkRules(filePath, content) {

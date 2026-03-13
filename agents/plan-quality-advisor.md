@@ -157,6 +157,14 @@ Every component with data fetching MUST verify:
 - [ ] **useState array typing** — `useState<MyItem[]>` not `useState<unknown[]>` for typed array state
 - [ ] **Cleanup on unmount** — Timers, subscriptions, and pending fetches cancelled in useEffect cleanup
 
+### 14. Text Display & State Persistence Checklist
+Every feature displaying user-generated or AI-generated text MUST verify:
+- [ ] **No JS truncation** — Text never truncated via `.substring()/.slice() + "..."` in JSX; use CSS `truncate` class instead
+- [ ] **sessionStorage reads** — All `JSON.parse(sessionStorage.getItem(...))` wrapped in try/catch with fallback
+- [ ] **Debounce cleanup** — Any `setTimeout` in React callbacks has corresponding `useRef` + `useEffect` cleanup
+- [ ] **Cross-page data handoff** — If passing data between pages via sessionStorage, receiving page validates shape before use
+- [ ] **Auto-save patterns** — Debounced save-to-API uses `useRef` for latest values (prevents stale closures)
+
 ## Review Process
 
 1. **Read the planning document** completely (supports any format: sprint file, PRD, task list, user stories, etc.)
